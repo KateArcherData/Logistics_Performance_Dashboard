@@ -1,0 +1,203 @@
+# 📊 DAX Measures – Logistics Performance Dashboard
+
+This document lists all DAX measures created for the **Logistics Performance Dashboard** Power BI project.  
+They are grouped by purpose: KPI, Cost, Carriers, Regional, and Dynamic Text.
+
+---
+
+## 🟩 1. KPI Measures
+Core metrics for operational and delivery performance.
+
+### Total Shipments
+Total Shipments = 
+COUNTROWS(Shipments)
+
+### On-Time %
+On-Time % = 
+DIVIDE(
+	CALCULATE(COUNTROWS(Shipments),
+	Shipments[Status] = "Delivered On Time"), 
+	COUNTROWS(Shipments)
+)
+
+### Avg Delay Days
+Avg Delay Days = 
+AVERAGEX(
+	FILTER(Shipments,
+	Shipments[Status]="Delayed"),
+	DATEDIFF(Shipments[ShipmentDate],
+	Shipments[DeliveryDate],
+	Day)
+)
+
+### Avg Delivery Time
+Avg Delivery Time = 
+	AVERAGEX(Shipments, 
+	DATEDIFF(Shipments[ShipmentDate], 
+	Shipments[DeliveryDate], 
+	DAY)
+)
+
+### Total Delayed Shipments
+Total Delayed Shipments = 
+CALCULATE(
+	COUNTROWS(Shipments),
+	Shipments[Status] = "Delayed"
+)
+
+
+---
+
+## 🟦 2. Cost Measures
+Measures supporting the Cost & Efficiency page.
+
+### Total Cost
+Total Cost = 
+SUM(Shipments[Cost]
+)
+
+### Avg Cost per Shipment
+Avg Cost per Shipment = 
+DIVIDE([Total Cost], [Total Shipments]
+)
+
+### Cost per Mile
+Cost per Mile = 
+DIVIDE(SUM(Shipments[Cost]), 
+SUM(Shipments[Distance])
+)
+
+### Avg Cost by Month
+Avg Cost by Month = 
+AVERAGE(Shipments[Cost]
+)
+
+---
+
+## 🟨 3. Carrier Measures
+Measures for ranking and analysing carrier performance.
+
+### Carrier On-Time %
+Carrier On-Time % = 
+DIVIDE(
+	CALCULATE(COUNTROWS(Shipments),
+	Shipments[Status]="Delivered On Time"),
+	COUNTROWS(Shipments)
+	)
+
+### Carrier Rank
+Carrier Rank = 
+VAR CURRENTVALUE = 
+	CALCULATE([Carrier On-Time %]) 
+		RETURN IF(ISBLANK(CURRENTVALUE),BLANK(),
+		RANKX(ALL(Shipments[Carrier]),
+		CALCULATE([Carrier On-Time %]),
+		CURRENTVALUE,
+		DESC,
+		Dense)
+	)
+---
+
+## 🟧 4. Regional Measures
+Measures supporting the Regional Insights page.
+
+### Best Region
+Best Region =
+VAR SummaryTable =
+    ADDCOLUMNS(
+        SUMMARIZE(Shipments, Shipments[Region]),
+        "OnTimeValue", [On-Time %]
+    )
+VAR TopRegion =
+    TOPN(1, SummaryTable, [OnTimeValue], DESC)
+RETURN
+    MAXX(TopRegion, Shipments[CustomerRegion])
+
+### Best Region On-Time %
+Best Region On-Time % =
+VAR SummaryTable =
+    ADDCOLUMNS(
+        SUMMARIZE(Shipments, Shipments[CustomerRegion]),
+        "OnTimeValue", [On-Time %]
+    )
+RETURN
+    MAXX(SummaryTable, [OnTimeValue])
+
+### Highest Cost Region
+Highest Cost Region =
+VAR SummaryTable =
+    ADDCOLUMNS(
+        SUMMARIZE(Shipments, Shipments[CustomerRegion]),
+        "TotalCost", [Total Cost]
+    )
+VAR TopRegion =
+    TOPN(1, SummaryTable, [TotalCost], DESC)
+RETURN
+    MAXX(TopRegion, Shipments[Region])
+
+### Highest Cost Region Value
+Highest Cost Region Value =
+VAR SummaryTable =
+    ADDCOLUMNS(
+        SUMMARIZE(Shipments, Shipments[CustomerRegion]),
+        "TotalCost", [Total Cost]
+    )
+VAR TopRegion =
+    TOPN(1, SummaryTable, [TotalCost], DESC)
+RETURN
+    MAXX(TopRegion, [TotalCost])
+
+### Worst Region
+Worst Region = VAR SummaryTable = 
+ADDCOLUMNS(
+	SUMMARIZE(Shipments,Shipments[CustomerRegion]),
+	"OnTimeValue",[On-Time %]
+	) 
+VAR LowestRegion = 
+	TOPN(1, SummaryTable, [OnTimeValue], ASC) 
+RETURN 
+	MAXX(LowestRegion, Shipments[CustomerRegion])
+
+---
+
+## 🟪 5. Dynamic Text Measures
+Narrative and title measures for storytelling visuals.
+
+### Regional Commentary
+Regional Summary Text = 
+"🏆"&[Best Region]&" is leading with "&
+FORMAT([Best Region On-Time %],"0.0%")&
+" on-time delivery, while "&
+[Worst Region] & " has the highest delays."
+
+### Dashboard Title Pg 1
+Dashboard Title = 
+"Logistics Performance Overview - " &SELECTEDVALUE('Calendar'[Year])
+
+### Dashboard Title Pg 2
+Dashboard Title Pg 2 = 
+"Delivery Performance - " &SELECTEDVALUE('Calendar'[Year])
+
+### Dashboard Title Pg 3
+Dashboard Title Pg 3 = 
+"Cost & Efficiency -" &SELECTEDVALUE('Shipments'[Carrier])
+
+### Dashboard Title Pg 4
+Dashboard Title Pg 4 = 
+"Regional Insights - " &SELECTEDVALUE('Calendar'[Year])
+
+---
+
+## 🧠 Notes
+- All measures are stored in a dedicated **Measures** table, grouped by **Display Folder** (KPIs, Cost, Carriers, Regional, Dynamic Text).  
+- Naming conventions use clear prefixes (`KPI_`, `CARR_`, `REG_`, etc.) for readability.  
+- Measures are written to be **context-aware** — they change dynamically when filtered by Carrier, or Year.  
+- This documentation allows others to review all DAX logic without needing access to the `.pbix` file.
+
+---
+
+### 📈 Summary
+**Total Measures:** 21  
+**Folders:** 5  
+**Complex (multi-variable) Measures:** 6
+
