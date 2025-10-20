@@ -69,9 +69,9 @@ To develop a professional-quality Power BI dashboard that:
 ---
 
 ### 🔗 Project Links
-- 📄 [Download Dashboard PDF](./Logistics_Performance_Dashboard.pdf)  
-- 📘 [View DAX Measures](./DAX_Measures.md)  
-- 💾 [View Dataset Structure](./Dataset_Structure.xlsx)  
+- 📄 [Download Dashboard PDF](./Logistics%20Performance%20Dashboard.pdf)  
+- 📘 [View DAX Measures](./DAX%20Measures.md)  
+- 💾 [View Dataset Structure](./Logistics_Performance_Dashboard_Data.xlsx)  
 
 ---
 
