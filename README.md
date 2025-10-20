@@ -70,7 +70,7 @@ To develop a professional-quality Power BI dashboard that:
 
 ### 🔗 Project Links
 - 📄 [Download Dashboard PDF](./Logistics%20Performance%20Dashboard.pdf)  
-- 📘 [View DAX Measures](./DAX%20Measures.md.txt)  
+- 📘 [View DAX Measures](./Dax%20measures.md.txt)  
 - 💾 [View Dataset Structure](./Logistics_Performance_Dashboard_Data.xlsx)  
 
 ---
